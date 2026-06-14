@@ -1,4 +1,4 @@
-# Detetive - Caderno de Investigação
+# Noite de Dedução - Caderno de Investigação
 
 Bem-vindo ao seu caderno de investigação para o jogo **Detetive/Cluedo**. Esta aplicação foi feita para ajudar você a acompanhar suspeitos, armas, cômodos, sugestões e anotações durante a partida, tudo em uma interface mobile-first, rápida e fácil de usar.
 
