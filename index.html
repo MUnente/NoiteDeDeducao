@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Noite de Dedução - Caderno de Investigação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+
+<div class="corner-deco"></div>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-top">
+    <div class="logo-area">
+      <span class="logo-eyebrow">Detetive / Cluedo</span>
+      <h1 class="logo-title"><em>Noite de Dedução</em> — Caso Aberto</h1>
+    </div>
+    <div class="case-badge" id="caseBadge">Sessão #001</div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="suspects">Suspeitos</button>
+    <button class="tab-btn" data-tab="weapons">Armas</button>
+    <button class="tab-btn" data-tab="rooms">Cômodos</button>
+    <button class="tab-btn" data-tab="solution">Solução</button>
+    <button class="tab-btn" data-tab="notes">Anotações</button>
+    <button class="tab-btn" data-tab="config">Config</button>
+  </nav>
+</header>
+
+<main class="main">
+
+  <!-- SUSPEITOS -->
+  <div class="tab-panel active" id="tab-suspects">
+    <div class="section-label"><span>Fichas dos Suspeitos</span></div>
+    <div class="legend" id="legend-suspects"></div>
+    <div class="clue-grid" id="grid-suspects" style="--player-count:4;"></div>
+  </div>
+
+  <!-- ARMAS -->
+  <div class="tab-panel" id="tab-weapons">
+    <div class="section-label"><span>Arsenal</span></div>
+    <div class="legend" id="legend-weapons"></div>
+    <div class="clue-grid" id="grid-weapons" style="--player-count:4;"></div>
+  </div>
+
+  <!-- CÔMODOS -->
+  <div class="tab-panel" id="tab-rooms">
+    <div class="section-label"><span>Planta da Mansão</span></div>
+    <div class="legend" id="legend-rooms"></div>
+    <div class="clue-grid" id="grid-rooms" style="--player-count:4;"></div>
+  </div>
+
+  <!-- SOLUÇÃO -->
+  <div class="tab-panel" id="tab-solution">
+    <div class="section-label"><span>Teoria Final</span></div>
+    <div class="info-box">
+      Registre sua teoria conforme vai eliminando possibilidades. O assassino, a arma e o local do crime.
+    </div>
+    <div class="solution-grid">
+      <div class="solution-card">
+        <div class="solution-card-label">Suspeito</div>
+        <select class="solution-select" id="sol-suspect"><option value="">— ?</option></select>
+      </div>
+      <div class="solution-card">
+        <div class="solution-card-label">Arma</div>
+        <select class="solution-select" id="sol-weapon"><option value="">— ?</option></select>
+      </div>
+      <div class="solution-card">
+        <div class="solution-card-label">Cômodo</div>
+        <select class="solution-select" id="sol-room"><option value="">— ?</option></select>
+      </div>
+    </div>
+
+    <div class="section-label"><span>Histórico de Sugestões</span></div>
+    <div id="suggestions-list">
+      <div style="color: var(--cream-faint); font-size: 12px; padding: 1rem 0;">Nenhuma sugestão registrada ainda.</div>
+    </div>
+    <div style="margin-top: 1rem;">
+      <button class="btn-primary" onclick="openSuggestionModal()">+ Registrar Sugestão</button>
+    </div>
+  </div>
+
+  <!-- ANOTAÇÕES -->
+  <div class="tab-panel" id="tab-notes">
+    <div class="section-label"><span>Diário de Campo</span></div>
+    <div class="notes-area">
+      <textarea class="notes-textarea" id="notesText" placeholder="Escreva suas deduções, pistas e observações aqui...&#10;&#10;Ex: João mostrou uma carta quando acusei o Prof. Black + faca + biblioteca. Deve ter a faca ou a biblioteca..."></textarea>
+    </div>
+    <button class="btn-small" onclick="saveNotes()">Salvar anotações</button>
+    <span id="notes-saved" style="font-size:11px;color:var(--green-bright);margin-left:8px;opacity:0;transition:opacity 0.3s;">Salvo ✓</span>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="tab-panel" id="tab-config">
+    <div class="section-label"><span>Jogadores</span></div>
+
+    <div id="players-list" class="setup-section"></div>
+
+    <div class="setup-input-row">
+      <input type="text" class="setup-input" id="newPlayerName" placeholder="Nome do jogador..." maxlength="18">
+      <button class="btn-primary" onclick="addPlayer()">+ Adicionar</button>
+    </div>
+
+    <div class="sep"></div>
+    <div class="section-label"><span>Cartas Personalizadas</span></div>
+    <div id="card-config"></div>
+
+    <div class="sep"></div>
+    <div class="section-label"><span>Sessão</span></div>
+    <div class="setup-input-row">
+      <input type="text" class="setup-input" id="caseNumber" placeholder="Nº da sessão (ex: 007)" maxlength="10">
+      <button class="btn-small" onclick="updateCaseNumber()">Salvar</button>
+    </div>
+
+    <div class="sep"></div>
+    <div class="section-label"><span>Dados</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-small" onclick="exportData()">Exportar JSON</button>
+      <button class="btn-small" onclick="document.getElementById('importFile').click()">Importar JSON</button>
+      <button class="btn-danger" onclick="confirmReset()">Resetar Partida</button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
+  </div>
+
+</main>
+
+<!-- Floating hint -->
+<div class="floating-hint" onclick="openLegendModal()">
+  <div class="dot-pulse"></div>
+  <span>Guia de Símbolos</span>
+</div>
+
+<!-- Legend Modal -->
+<div class="modal-overlay" id="legendModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Guia de Símbolos</div>
+    <div class="symbol-grid">
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#4CAF80;">✓</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Confirmado</span>
+          <span class="symbol-desc">Jogador tem a carta</span>
+        </div>
+      </div>
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#C0392B;">✗</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Eliminado</span>
+          <span class="symbol-desc">Jogador não tem</span>
+        </div>
+      </div>
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#C9A84C;">?</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Suspeito</span>
+          <span class="symbol-desc">Incerto, investigar</span>
+        </div>
+      </div>
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#B09AE0;">★</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Pista Chave</span>
+          <span class="symbol-desc">Informação crítica</span>
+        </div>
+      </div>
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#6ABEEB;">〜</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Rumor</span>
+          <span class="symbol-desc">Info duvidosa</span>
+        </div>
+      </div>
+      <div class="symbol-item">
+        <span class="symbol-icon" style="color:#FFAA00;">!</span>
+        <div class="symbol-info">
+          <span class="symbol-name">Atenção</span>
+          <span class="symbol-desc">Observar com cuidado</span>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--cream-faint);margin-bottom:1rem;">Toque em qualquer célula para ciclar pelos símbolos.</div>
+    <button class="btn-small" onclick="closeLegendModal()" style="width:100%;">Fechar</button>
+  </div>
+</div>
+
+<!-- Edit Player Modal -->
+<div class="modal-overlay" id="editPlayerModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar Jogador</div>
+
+    <input type="hidden" id="edit-player-idx" value="">
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;">
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Nome do Jogador</div>
+        <input type="text" id="edit-player-name" class="setup-input" placeholder="Nome..." maxlength="18">
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Cor</div>
+        <input type="color" id="edit-player-color" style="width:100%;height:40px;border:none;border-radius:3px;cursor:pointer;">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn-primary" onclick="saveEditPlayer()" style="flex:1;">Salvar</button>
+      <button class="btn-small" onclick="closeEditPlayerModal()" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Suggestion Modal -->
+<div class="modal-overlay" id="suggestionModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Sugestão</div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:1rem;">
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Quem sugeriu</div>
+        <select class="solution-select" id="sug-who" style="width:100%;"></select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Suspeito</div>
+        <select class="solution-select" id="sug-suspect" style="width:100%;"><option value="">—</option></select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Arma</div>
+        <select class="solution-select" id="sug-weapon" style="width:100%;"><option value="">—</option></select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Cômodo</div>
+        <select class="solution-select" id="sug-room" style="width:100%;"><option value="">—</option></select>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--gold-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;">Quem refutou</div>
+        <select class="solution-select" id="sug-refuted" style="width:100%;"><option value="ninguém">Ninguém refutou</option></select>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn-primary" onclick="saveSuggestion()" style="flex:1;">Salvar</button>
+      <button class="btn-small" onclick="closeSuggestionModal()" style="flex:1;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript" src="index.js"></script>
+</body>
+</html>
